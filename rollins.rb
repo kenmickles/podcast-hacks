@@ -7,13 +7,20 @@ require 'open-uri'
 require 'rss'
 require 'json'
 
-# scrape website for latest episode number
-url = "http://www.kcrw.com/music/programs/hr"
-episodes = []
-page = Nokogiri::HTML(open(url))
+# scrape website for available episodes
+json_urls = []
+page = Nokogiri::HTML(open("http://www.kcrw.com/music/programs/hr"))
 
-page.css('#all_episodes a[data-player-json]').each do |a|
-  json_url = a.attributes['data-player-json']
+page.css('a[data-player-json*=rollins]').each do |a|
+  json_urls << a.attributes['data-player-json'].value
+end
+
+json_urls.uniq!.sort!.reverse!
+
+# fetch episode data from JSON API
+episodes = []
+
+json_urls.each do |json_url|
   data = JSON.parse(open(json_url).read)
   # only save the episodes with media attached
   episodes << data if (data['media'] || []).length > 0
