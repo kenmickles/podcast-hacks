@@ -7,6 +7,21 @@ require 'open-uri'
 require 'rss'
 require 'json'
 
+def fetch_description(data)
+  number = data['title'].split(' ').last.strip
+  date_str = DateTime.parse(data['airdate']).strftime("%m-%d%y")
+  url = "http://henryrollins.com/kcrw/detail/radio_broadcast_#{number}_#{date_str}/"
+  page = Nokogiri::HTML(open(url))
+  description = ""
+
+  page.css('#content .col7 .col p').each do |el|
+    lines = el.text.strip.split("\n").map(&:strip)
+    description += "<p>#{lines.join("<br>")}</p>"
+  end
+
+  description
+end
+
 # scrape website for available episodes
 json_urls = []
 page = Nokogiri::HTML(open("http://www.kcrw.com/music/programs/hr"))
@@ -22,8 +37,14 @@ episodes = []
 
 json_urls.each do |json_url|
   data = JSON.parse(open(json_url).read)
+  
   # only save the episodes with media attached
-  episodes << data if (data['media'] || []).length > 0
+  if (data['media'] || []).length > 0
+    data['description'] = fetch_description(data)
+    episodes << data
+  end
+
+  sleep 1.0
 end
 
 # build RSS feed
