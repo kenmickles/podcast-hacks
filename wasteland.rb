@@ -15,7 +15,7 @@ page.css('a:contains("MP3 - 128K")').each do |a|
   show_id = a.attributes['href'].to_s.gsub(/(.*)show=/, '').gsub(/\&(.*)/, '')
   m3u_url = "http://wfmu.org#{a.attributes['href']}"
   open(m3u_url) do |f|
-    mp3s[show_id] = f.read
+    mp3s[show_id] = f.read.strip
   end
 end
 
