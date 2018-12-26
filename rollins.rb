@@ -10,7 +10,7 @@ require 'sanitize'
 
 def fetch_description(data)
   page = Nokogiri::HTML(open(data['url']))
-  description = page.css('#entries .content .clearfix')[0].inner_html
+  description = page.css('.content[itemprop=articleBody]')[0].inner_html
 	
 	Sanitize.fragment(description, 
 		elements: %w(b i em ul li p br a strong),
@@ -20,7 +20,7 @@ end
 
 # scrape website for available episodes
 json_urls = []
-page = Nokogiri::HTML(open("http://www.kcrw.com/music/programs/hr"))
+page = Nokogiri::HTML(open("https://www.kcrw.com/music/programs/hr"))
 
 page.css('a[data-player-json*=rollins]').each do |a|
   json_urls << a.attributes['data-player-json'].value
