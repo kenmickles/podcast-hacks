@@ -20,9 +20,9 @@ end
 
 # scrape website for available episodes
 json_urls = []
-page = Nokogiri::HTML(open("https://www.kcrw.com/music/programs/hr"))
+page = Nokogiri::HTML(open("https://www.kcrw.com/music/shows/henry-rollins"))
 
-page.css('a[data-player-json*=rollins]').each do |a|
+page.css('[data-player-json*=rollins]').each do |a|
   json_urls << a.attributes['data-player-json'].value
 end
 
