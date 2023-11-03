@@ -9,7 +9,7 @@ require 'json'
 require 'sanitize'
 
 def fetch_description(data)
-  page = Nokogiri::HTML(open(data['url']))
+  page = Nokogiri::HTML(URI.open(data['url']))
   description = page.css('.content[itemprop=articleBody]')[0].inner_html
 	
 	Sanitize.fragment(description, 
@@ -20,7 +20,7 @@ end
 
 # scrape website for available episodes
 json_urls = []
-page = Nokogiri::HTML(open("https://www.kcrw.com/music/shows/henry-rollins"))
+page = Nokogiri::HTML(URI.open("https://www.kcrw.com/music/shows/henry-rollins"))
 
 page.css('[data-player-json*=rollins]').each do |a|
   json_urls << a.attributes['data-player-json'].value
@@ -32,7 +32,7 @@ json_urls.uniq!.sort!.reverse!
 episodes = []
 
 json_urls.each do |json_url|
-  data = JSON.parse(open(json_url).read)
+  data = JSON.parse(URI.open(json_url).read)
 
   # only save the episodes with media attached
   if (data['media'] || []).length > 0
