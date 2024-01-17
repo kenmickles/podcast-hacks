@@ -12,10 +12,10 @@ def fetch_description(url)
   page = Nokogiri::HTML(URI.open(url))
   description = page.css('.content[itemprop=articleBody]')[0].inner_html
 	
-	Sanitize.fragment(description, 
-		elements: %w(b i em ul li p br a strong),
-		attributes: { 'a' => ['href'] }
-	).strip
+  Sanitize.fragment(description, 
+    elements: %w(b i em ul li p br a strong),
+    attributes: { 'a' => ['href'] }
+  ).strip
 end
 
 # fetch episode data from JSON API
@@ -35,9 +35,9 @@ rss = RSS::Maker.make("2.0") do |maker|
   maker.channel.itunes_image = "http://www.kcrw.com/music/shows/henry-rollins/@@images/square_image"
 
   episodes.each do |ep|
-		# fetch full description from episode page
-		description = fetch_description(ep['url'])
-		sleep 1.0
+    # fetch full description from episode page
+    description = fetch_description(ep['url'])
+    sleep 1.0
 
     maker.items.new_item do |item|
       item.title = ep['title']
