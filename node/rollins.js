@@ -15,6 +15,7 @@ async function main() {
   const page = await browser.newPage()
   await page.setViewport({ width: 1920, height: 1080 })
   await page.goto("https://www.kcrw.com/host/henry-rollins")
+  await page.waitForNetworkIdle()
 
   const episodes = await page.evaluate(() => {
     const episodes = []
