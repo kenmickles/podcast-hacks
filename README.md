@@ -1,3 +1,3 @@
 ## podcast-hacks
 
-Some Ruby scripts I use to download podcasts.
+Some scripts I use to download podcasts.
