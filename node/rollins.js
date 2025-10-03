@@ -11,8 +11,9 @@ const log = (message) => {
 }
 
 async function main() {
-  const browser = await puppeteer.launch()
+  const browser = await puppeteer.launch({ headless: true })
   const page = await browser.newPage()
+  await page.setViewport({ width: 1920, height: 1080 })
   await page.goto("https://www.kcrw.com/host/henry-rollins")
 
   const episodes = await page.evaluate(() => {
