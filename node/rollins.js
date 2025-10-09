@@ -3,6 +3,7 @@ require("dotenv").config()
 const puppeteer = require("puppeteer")
 const { Feed } = require("feed")
 const fs = require("fs")
+const cheerio = require("cheerio")
 
 const RSS_FILE_PATH = process.env.ROLLINS_RSS_FILE_PATH || "rollins.xml"
 
@@ -30,40 +31,28 @@ async function main() {
     return episodes
   })
 
+  await browser.close()
+
   for (let i = 0; i < episodes.length; i++) {
     // sleep for 1 second
     await new Promise(resolve => setTimeout(resolve, 1000))
 
     const episode = episodes[i]
-    const page = await browser.newPage()
 
     log(`Fetching ${episode.title} (${episode.url})...`)
-    await page.goto(episode.url)
+    const response = await fetch(episode.url)
+    const html = await response.text()
 
-    const details = await page.evaluate(() => {
-      let currentEpisode
+    const matches = html.match(/https:\/\/ondemand-media\.kcrw\.com\/(.*)\.mp3/gi)
 
-      const payload = window.__next_f.map(f => f[1])
-        .filter(s => s && s.match(/ondemand(.*)\.mp3/))[0]
-        .replace(/^\d\d\:/, '')
+    if (matches.length > 0) {
+      episodes[i].mp3 = matches[0].replace(/(.*)"/g, '')
 
-      try {
-        const data = JSON.parse(payload)[3].children[0][3]
-        currentEpisode = data.currentEpisode
-      } catch (error) {
-        currentEpisode = null
-      }
-
-      return {
-        mp3: currentEpisode ? currentEpisode.audioMedia.mediaUrl : null,
-        description: document.querySelector('section[aria-label="Article content"]').innerText,
-      }
-    })
-
-    episodes[i] = { ...episode, ...details }
+      const $ = cheerio.load(html)
+      const description = $('section[aria-label="Article content"]').text()
+      episodes[i].description = description
+    }
   }
-
-  await browser.close()
 
   const feed = new Feed({
     title: "Henry Rollins - KCRW",

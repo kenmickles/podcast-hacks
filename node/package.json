@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "cheerio": "^1.1.2",
     "dotenv": "^17.2.3",
     "feed": "^5.1.0",
     "puppeteer": "^24.23.0"
