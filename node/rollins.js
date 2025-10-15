@@ -4,12 +4,21 @@ const puppeteer = require("puppeteer")
 const { Feed } = require("feed")
 const fs = require("fs")
 const cheerio = require("cheerio")
+const createDOMPurify = require('dompurify')
+const { JSDOM } = require('jsdom')
 
 const RSS_FILE_PATH = process.env.ROLLINS_RSS_FILE_PATH || "rollins.xml"
 
 const log = (message) => {
   if (process.env.VERBOSE) console.log(`[${new Date().toISOString()}] ${message}`)
 }
+
+const sanitizeHTML = (html) => {
+  const window = new JSDOM('').window
+  const DOMPurify = createDOMPurify(window)
+  return DOMPurify.sanitize(html, { ALLOWED_TAGS: ['b', 'i', 'em', 'ul' ,'li', 'p', 'br', 'a', 'strong'] })
+}
+
 
 async function main() {
   const browser = await puppeteer.launch({ headless: true })
@@ -49,8 +58,8 @@ async function main() {
       episodes[i].mp3 = matches[0].replace(/(.*)"/g, '')
 
       const $ = cheerio.load(html)
-      const description = $('section[aria-label="Article content"]').text()
-      episodes[i].description = description
+      const description = $('section[aria-label="Article content"]').html()
+      episodes[i].description = sanitizeHTML(description)
     }
   }
 
