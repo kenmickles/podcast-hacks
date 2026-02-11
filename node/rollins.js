@@ -40,8 +40,6 @@ async function main() {
     return episodes
   })
 
-  await browser.close()
-
   for (let i = 0; i < episodes.length; i++) {
     // sleep for 1 second
     await new Promise(resolve => setTimeout(resolve, 1000))
@@ -49,12 +47,13 @@ async function main() {
     const episode = episodes[i]
 
     log(`Fetching ${episode.title} (${episode.url})...`)
-    const response = await fetch(episode.url)
-    const html = await response.text()
+    await page.goto(episode.url)
+    await page.waitForNetworkIdle()
+    const html = await page.content()
 
     const matches = html.match(/https:\/\/ondemand-media\.kcrw\.com\/(.*)\.mp3/gi)
 
-    if (matches.length > 0) {
+    if (matches && matches.length > 0) {
       episodes[i].mp3 = matches[0].replace(/(.*)"/g, '')
 
       const $ = cheerio.load(html)
@@ -62,6 +61,8 @@ async function main() {
       episodes[i].description = sanitizeHTML(description)
     }
   }
+
+  await browser.close()
 
   const feed = new Feed({
     title: "Henry Rollins - KCRW",
